@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # --- Service 1: Flask ---
+  flask-app:
+    build: ./flask-service
+    ports:
+      - "5001:5000"
+    environment:
+      - FLASK_ENV=development
+    depends_on:
+      - redis-db
+    networks:
+      - microservices-network
+
+  # --- Service 2: FastAPI ---
+  fastapi-app:
+    build: ./fastapi-service
+    ports:
+      - "5002:5000"
+    depends_on:
+      - redis-db
+    networks:
+      - microservices-network
+
+  # --- Service 3: Django ---
+  django-app:
+    build: ./django-service
+    ports:
+      - "5003:5000"
+    depends_on:
+      - redis-db
+    networks:
+      - microservices-network
+
+  # --- Service 4: Database Redis (Shared) ---
+  redis-db:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - microservices-network
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  redis-data:
